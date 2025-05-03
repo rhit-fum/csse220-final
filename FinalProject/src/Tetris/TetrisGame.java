@@ -21,14 +21,14 @@ public class TetrisGame extends JPanel{
     //load images
     static {
         try {
-            I = ImageIO.read(new File("src/resource/images/I.png"));
-            J = ImageIO.read(new File("src/resource/images/J.png"));
-            L = ImageIO.read(new File("src/resource/images/L.png"));
-            O = ImageIO.read(new File("src/resource/images/O.png"));
-            S = ImageIO.read(new File("src/resource/images/S.png"));
-            T = ImageIO.read(new File("src/resource/images/T.png"));
-            Z = ImageIO.read(new File("src/resource/images/Z.png"));
-            background = ImageIO.read(new File("Tetris-master/images/background.png"));
+            I = ImageIO.read(new File("src/resource/I.png"));
+            J = ImageIO.read(new File("src/resource/J.png"));
+            L = ImageIO.read(new File("src/resource/L.png"));
+            O = ImageIO.read(new File("src/resource/O.png"));
+            S = ImageIO.read(new File("src/resource/S.png"));
+            T = ImageIO.read(new File("src/resource/T.png"));
+            Z = ImageIO.read(new File("src/resource/Z.png"));
+            background = ImageIO.read(new File("src/resource/background.png"));
         } catch (IOException e) {
             System.out.print("image not found");
         }
