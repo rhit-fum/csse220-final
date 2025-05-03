@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 public class TetrisGame extends JPanel{
 	private int gameState; //gamestate: pause,continue, replay
@@ -37,10 +38,17 @@ public class TetrisGame extends JPanel{
     protected void paintComponent(Graphics g) {
     	super.paintComponent(g);
     	Graphics2D g2=(Graphics2D) g;
-    	g2.drawImage(background, 0, 0, this);
+    	g2.drawImage(background, 0, 0, this); //setup the backgroun image
+    	g2.drawImage(I, 0, 0, this); //test draw a block
     }
 	public static void main(String[] args) {
-		
+		JFrame frame=new JFrame("Tetris Game");
+		TetrisGame panel=new TetrisGame();
+		frame.add(panel);
+		frame.setVisible(true);
+		frame.setSize(810,940);
+		frame.setLocationRelativeTo(null);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 	}
 
