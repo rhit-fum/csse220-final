@@ -1,4 +1,7 @@
 package Tetris;
+/**
+ * @author mingkun fu
+ */
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -12,6 +15,7 @@ public class TetrisGame extends JPanel{
 	private int gameState; //gamestate: pause,continue, replay
 	private Cell[][] grid=new Cell[18][9]; //the grids in the window
 	private final int GRID_SIZE=48; //grid size is 48*48
+	private Tetromino currentPiece=new I(); //test drawing the tetromino piece shaped I, comment this line afterwards
 	//image of the blocks
 	public static BufferedImage I;
     public static BufferedImage J;
@@ -44,10 +48,12 @@ public class TetrisGame extends JPanel{
     	g2.drawImage(background, 0, 0, this); //setup the backgroun image
     	g2.translate(22, 15);
     	drawGrid(g2);
+    	drawCurrentPiece(g2);
     	//g2.drawImage(I, 0, 0, this); //test draw a block, comment this line after
     }
+    
     //drawing the grids on the window
-    private void drawGrid(Graphics g) {
+    private void drawGrid(Graphics2D g) {
     	for(int i=0;i<grid.length;i++) {
     		for(int j=0;j<grid[i].length;j++) {
     			int x=j*GRID_SIZE; //getting x and y position of each cell
@@ -58,6 +64,24 @@ public class TetrisGame extends JPanel{
     		}
     	}
     }
+    
+    //draw the current tetromino piece
+    private void drawCurrentPiece(Graphics2D g) {
+    	Cell[] cells=currentPiece.cells;
+    	for(Cell cell:cells) {
+    		int x=cell.getCol()*GRID_SIZE;
+    		int y=cell.getRow()*GRID_SIZE;
+    		g.drawImage(cell.getImage(), x, y, this);
+    	}
+    	
+    }
+    
+    //draw the next tetromino piece
+    private void drawNextPiece(Graphics2D g) {
+    	
+    }
+    
+    //game loop
     public void gameStart() {
     	
     }
@@ -68,7 +92,7 @@ public class TetrisGame extends JPanel{
 		TetrisGame game=new TetrisGame();
 		frame.add(game);
 		frame.setVisible(true);
-		frame.setSize(810,940);
+		frame.setSize(810,940); //let the window size equal to the background image size
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
