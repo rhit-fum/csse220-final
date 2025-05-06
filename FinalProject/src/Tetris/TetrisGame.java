@@ -4,6 +4,8 @@ package Tetris;
  */
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,11 +13,16 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 public class TetrisGame extends JPanel{
 	private int gameState; //gamestate: pause,continue, replay
-	private Cell[][] grid=new Cell[18][9]; //the grids in the window
+	private Cell[][] grid=new Cell[18][9]; //the grids in the window. the window have 18*9 grids
 	private final int GRID_SIZE=48; //grid size is 48*48
 	private Tetromino currentPiece=new I(); //test drawing the tetromino piece shaped I, comment this line afterwards
+	//define game states:
+	public final int PLAYING=0;
+	public final int PAUSE=1;
+	public final int GAMEOVER=2;
 	//image of the blocks
 	public static BufferedImage I;
     public static BufferedImage J;
@@ -81,9 +88,31 @@ public class TetrisGame extends JPanel{
     	
     }
     
-    //game loop
+    //movements
+    private void autoFallDown() {
+    	Timer animationTimer = new Timer(700, e -> Fall()); //setting up a timer, each 700 ms fall down a unit
+    	animationTimer.start();
+    }
+    private void Fall() {
+		// done Auto-generated method stub
+		currentPiece.moveDown();
+	}
+    private boolean canFall() { //detect whether the current piece will collide with the land or other locked pieces
+    	return true;  //to be implemented
+    }
+
+	//game loop
     public void gameStart() {
-    	
+    	this.requestFocus(); //focus on the window
+    	if(canFall()) {
+    		autoFallDown();
+    	}
+    	while(true) {
+    		if(gameState==PLAYING) {
+    			
+    		}
+    		repaint();
+    	}
     }
     
 	public static void main(String[] args) {
