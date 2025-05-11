@@ -25,5 +25,20 @@ public class Tetromino {
 			cell.down();
 		}
 	}
+	
+	public void rotate() {
+		for (Cell cell:cells) {
+			if (!cell.equals(cells[0])) {
+				int dx = cell.getCol() - cells[0].getCol();
+				int dy = cell.getRow() - cells[0].getRow();
+				int dx2 = -dy;
+				int dy2 = dx;
+				cell.setCol(cells[0].getCol() + dx2);
+				cell.setRow(cells[0].getRow() + dy2);
+			}
+		}
+	}
+	
+	
 }
     

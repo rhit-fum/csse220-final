@@ -40,4 +40,5 @@ public class Cell {
 		row++;
 	}
 	//since in Tetris the tetromino pieces are not able to go upwards, so only down() required
+	
 }

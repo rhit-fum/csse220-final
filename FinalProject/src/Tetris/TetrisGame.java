@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +16,12 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+
 public class TetrisGame extends JPanel{
 	private int gameState; //gamestate: pause,continue, replay
 	private Cell[][] grid=new Cell[18][9]; //the grids in the window. the window have 18*9 grids
 	private final int GRID_SIZE=48; //grid size is 48*48
-	private Tetromino currentPiece=new I(); //test drawing the tetromino piece shaped I, comment this line afterwards
+	private Tetromino currentPiece=new T(); //test drawing the tetromino piece shaped I, comment this line afterwards
 	//define game states:
 	public final int PLAYING=0;
 	public final int PAUSE=1;
@@ -52,7 +55,7 @@ public class TetrisGame extends JPanel{
     protected void paintComponent(Graphics g) {
     	super.paintComponent(g);
     	Graphics2D g2=(Graphics2D) g;
-    	g2.drawImage(background, 0, 0, this); //setup the backgroun image
+    	g2.drawImage(background, 0, 0, this); //setup the background image
     	g2.translate(22, 15);
     	drawGrid(g2);
     	drawCurrentPiece(g2);
@@ -84,8 +87,9 @@ public class TetrisGame extends JPanel{
     }
     
     //draw the next tetromino piece
-    private void drawNextPiece(Graphics2D g) {
-    	
+    private Tetromino drawNextPiece() {
+    	Tetromino currentPiece = new J();
+    	return currentPiece;
     }
     
     //movements
@@ -93,12 +97,67 @@ public class TetrisGame extends JPanel{
     	Timer animationTimer = new Timer(700, e -> Fall()); //setting up a timer, each 700 ms fall down a unit
     	animationTimer.start();
     }
+    
+    private void fastAutoFall() {
+    	Timer animationTimer = new Timer(300, e -> Fall());
+    	animationTimer.start();
+    }
+    
+    
     private void Fall() {
 		// done Auto-generated method stub
-		currentPiece.moveDown();
+    	if (canFall()) {
+    		currentPiece.moveDown();
+    	}
+    	else {
+    		currentPiece = drawNextPiece();
+    	}
 	}
+    
+    private void moveLeft() {
+    	if (canMoveLeft()) {
+    		currentPiece.moveLeft();
+    	}
+    }
+    
+    private void moveRight() {
+    	if (canMoveRight()) {
+    		currentPiece.moveRight();
+    	}
+    }
+    
+    private void rotate() {
+    	currentPiece.rotate();
+    }
+    
     private boolean canFall() { //detect whether the current piece will collide with the land or other locked pieces
-    	return true;  //to be implemented
+    	boolean a = true;
+    	for (Cell i : currentPiece.cells) {
+    		if (i.getRow() == 17) {
+    			a = false;
+    		}
+    	}
+    	return a;
+    }
+    
+    private boolean canMoveLeft() { //detect whether the current piece will collide with the land or other locked pieces
+    	boolean a = true;
+    	for (Cell i : currentPiece.cells) {
+    		if (i.getCol() == 0) {
+    			a = false;
+    		}
+    	}
+    	return a;
+    }
+    
+    private boolean canMoveRight() { //detect whether the current piece will collide with the land or other locked pieces
+    	boolean a = true;
+    	for (Cell i : currentPiece.cells) {
+    		if (i.getCol() == 8) {
+    			a = false;
+    		}
+    	}
+    	return a;
     }
 
 	//game loop
@@ -120,6 +179,26 @@ public class TetrisGame extends JPanel{
 		JFrame frame=new JFrame("Tetris Game");
 		TetrisGame game=new TetrisGame();
 		frame.add(game);
+		
+		game.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+              switch (e.getKeyCode()) {
+                case KeyEvent.VK_LEFT:  game.moveLeft(); break;
+                case KeyEvent.VK_RIGHT: game.moveRight(); break;
+                case KeyEvent.VK_UP: 	game.rotate(); break;
+                case KeyEvent.VK_DOWN:  game.fastAutoFall(); break;
+              }
+            }
+            
+            public void keyRemoved(KeyEvent e) {
+            	switch (e.getKeyCode()) {
+	                case KeyEvent.VK_DOWN:  game.autoFallDown(); break;
+              }
+            }
+            
+          });
+		
 		frame.setVisible(true);
 		frame.setSize(810,940); //let the window size equal to the background image size
 		frame.setLocationRelativeTo(null);
