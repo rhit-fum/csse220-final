@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.awt.event.KeyListener;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -21,7 +22,9 @@ public class TetrisGame extends JPanel{
 	private int gameState; //gamestate: pause,continue, replay
 	private Cell[][] grid=new Cell[18][9]; //the grids in the window. the window have 18*9 grids
 	private final int GRID_SIZE=48; //grid size is 48*48
-	private Tetromino currentPiece=new T(); //test drawing the tetromino piece shaped I, comment this line afterwards
+	//private Tetromino currentPiece=new T(); //test drawing the tetromino piece shaped I, comment this line afterwards
+	private Tetromino currentPiece=Tetromino.randomPiece(); //current piece
+	private Tetromino nextPiece=Tetromino.randomPiece(); //next piece
 	//define game states:
 	public final int PLAYING=0;
 	public final int PAUSE=1;
@@ -59,6 +62,7 @@ public class TetrisGame extends JPanel{
     	g2.translate(22, 15);
     	drawGrid(g2);
     	drawCurrentPiece(g2);
+    	drawNextPiece(g2);
     	//g2.drawImage(I, 0, 0, this); //test draw a block, comment this line after
     }
     
@@ -87,15 +91,20 @@ public class TetrisGame extends JPanel{
     }
     
     //draw the next tetromino piece
-    private Tetromino drawNextPiece() {
-    	Tetromino currentPiece = new J();
-    	return currentPiece;
+    private void drawNextPiece(Graphics2D g) {
+    	Cell[] cells=nextPiece.cells;
+    	for(Cell cell:cells) {
+    		int x=cell.getCol()*GRID_SIZE+370;
+    		int y= cell.getRow()*GRID_SIZE+25;
+    		g.drawImage(cell.getImage(), x, y, this);
+    	}
     }
     
     //movements
     private void autoFallDown() {
     	Timer animationTimer = new Timer(700, e -> Fall()); //setting up a timer, each 700 ms fall down a unit
     	animationTimer.start();
+    	repaint();
     }
     
     private void fastAutoFall() {
@@ -104,15 +113,30 @@ public class TetrisGame extends JPanel{
     }
     
     
-    private void Fall() {
+    private void Fall() { //let tetromino piece fall down a unit
 		// done Auto-generated method stub
-    	if (canFall()) {
+    	if(canFall()) { //if can fall down
     		currentPiece.moveDown();
+    	}else {
+    		lockPiece();
+    		eliminateLine();
+    		if(isGameOver()) {
+    			
+    		}else {
+    			currentPiece=nextPiece;
+    			nextPiece=Tetromino.randomPiece();
+    		}
     	}
-    	else {
-    		currentPiece = drawNextPiece();
-    	}
+    	
 	}
+    private void lockPiece() { //lock the landed pieces to the gameboard
+    	Cell[] cells=currentPiece.cells;
+    	for(Cell cell:cells) {
+    		int row=cell.getRow();
+    		int col=cell.getCol();
+    		grid[row][col]=cell;
+    	}
+    }
     
     private void moveLeft() {
     	if (canMoveLeft()) {
@@ -131,15 +155,19 @@ public class TetrisGame extends JPanel{
     }
     
     private boolean canFall() { //detect whether the current piece will collide with the land or other locked pieces
-    	boolean a = true;
     	for (Cell i : currentPiece.cells) {
-    		if (i.getRow() == 17) {
-    			a = false;
+    		int row = i.getRow();
+            int col = i.getCol();
+    		if (i.getRow() == 17) {//if touches bottom
+    			return false;
+    		}
+    		else if(grid[row+1][col]!=null) {// if touches locked pieces
+    			return false;
     		}
     	}
-    	return a;
+    	return true;
     }
-    
+     
     private boolean canMoveLeft() { //detect whether the current piece will collide with the land or other locked pieces
     	boolean a = true;
     	for (Cell i : currentPiece.cells) {
@@ -159,17 +187,52 @@ public class TetrisGame extends JPanel{
     	}
     	return a;
     }
-
+    private void eliminateLine() { //eliminate the line after a line is fulled
+    	//TODO: to be implemented
+    }
 	//game loop
+    public boolean isGameOver() { //determine whether gameovers or not
+    	return false; //TODO: to be implemented
+    }
     public void gameStart() {
+    	gameState=PLAYING;
+    	KeyListener l=new KeyAdapter() { //capture player input
+    		@Override
+    		public void keyPressed(KeyEvent e) {
+    			int key=e.getKeyCode();
+    			switch(key) {
+    				case KeyEvent.VK_DOWN:
+    					Fall();
+    					break;
+    				case KeyEvent.VK_LEFT:
+    					moveLeft();
+    					break;
+    				case KeyEvent.VK_RIGHT:
+    					moveRight();
+    					break;
+    				case KeyEvent.VK_UP:
+    					rotate();
+    					break;
+    			}
+    		}
+    	};
+    	this.addKeyListener(l);
     	this.requestFocus(); //focus on the window
-    	if(canFall()) {
-    		autoFallDown();
+    	if(gameState==PLAYING) {
+    		if(canFall()) {
+    			autoFallDown();
+    		}else {
+    			lockPiece();
+    			eliminateLine();
+    			if(isGameOver()) { //if game overs
+    				gameState=GAMEOVER;
+    			}else {
+    				currentPiece=nextPiece;
+    				nextPiece=Tetromino.randomPiece(); //generate next piece
+    			}
+    		}
     	}
     	while(true) {
-    		if(gameState==PLAYING) {
-    			
-    		}
     		repaint();
     	}
     }
@@ -180,30 +243,10 @@ public class TetrisGame extends JPanel{
 		TetrisGame game=new TetrisGame();
 		frame.add(game);
 		
-		game.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-              switch (e.getKeyCode()) {
-                case KeyEvent.VK_LEFT:  game.moveLeft(); break;
-                case KeyEvent.VK_RIGHT: game.moveRight(); break;
-                case KeyEvent.VK_UP: 	game.rotate(); break;
-                case KeyEvent.VK_DOWN:  game.fastAutoFall(); break;
-              }
-            }
-            
-            public void keyRemoved(KeyEvent e) {
-            	switch (e.getKeyCode()) {
-	                case KeyEvent.VK_DOWN:  game.autoFallDown(); break;
-              }
-            }
-            
-          });
-		
 		frame.setVisible(true);
 		frame.setSize(810,940); //let the window size equal to the background image size
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
 		//start the game
 		game.gameStart();
 	}

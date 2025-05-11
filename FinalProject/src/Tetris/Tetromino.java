@@ -1,7 +1,6 @@
 package Tetris;
 
 import java.awt.image.BufferedImage;
-
 public class Tetromino {
 	//cell array has the information of the position of blocks
 	//each tetromino piece is consisted of 4 blocks, so an array of 4 elements
@@ -25,6 +24,36 @@ public class Tetromino {
 			cell.down();
 		}
 	}
+	//generate tetromino pieces randomly
+	public static Tetromino randomPiece() {
+        int num = (int) (Math.random() * 7);
+        Tetromino tetromino = null;
+        switch (num) {
+            case 0:
+                tetromino = new I();
+                break;
+            case 1:
+                tetromino = new J();
+                break;
+            case 2:
+                tetromino = new L();
+                break;
+            case 3:
+                tetromino = new O();
+                break;
+            case 4:
+                tetromino = new S();
+                break;
+            case 5:
+                tetromino = new T();
+                break;
+            case 6:
+                tetromino = new Z();
+                break;
+        }
+
+        return tetromino;
+    }
 	
 	public void rotate() {
 		for (Cell cell:cells) {
