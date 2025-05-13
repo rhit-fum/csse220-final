@@ -29,6 +29,7 @@ public class Cell {
 		this.image=image;
 	}
 	
+	
 	//movements
 	public void left() {
 		col--;

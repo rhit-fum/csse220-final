@@ -119,7 +119,14 @@ public class TetrisGame extends JPanel{
     		currentPiece.moveDown();
     	}else {
     		lockPiece();
-    		eliminateLine();
+    		for (int i = 17; i >= 0; i--) {
+				System.out.println(i);
+    			if(checkRow(i)) {
+    				eliminateLine(i);
+    				repaint();
+    				i++;
+    			}
+    		}
     		if(isGameOver()) {
     			
     		}else {
@@ -169,26 +176,56 @@ public class TetrisGame extends JPanel{
     }
      
     private boolean canMoveLeft() { //detect whether the current piece will collide with the land or other locked pieces
-    	boolean a = true;
     	for (Cell i : currentPiece.cells) {
+    		int row = i.getRow();
+    		int col = i.getCol();
     		if (i.getCol() == 0) {
-    			a = false;
+    			return false;
+    		}
+    		else if(grid[row][col-1]!=null) {
+    			return false;
     		}
     	}
-    	return a;
+    	return true;
     }
     
     private boolean canMoveRight() { //detect whether the current piece will collide with the land or other locked pieces
-    	boolean a = true;
     	for (Cell i : currentPiece.cells) {
+    		int row = i.getRow();
+    		int col = i.getCol();
     		if (i.getCol() == 8) {
-    			a = false;
+    			return false;
+    		}
+    		else if(grid[row][col-1]!=null) {
+    			return false;
     		}
     	}
-    	return a;
+    	return true;
     }
-    private void eliminateLine() { //eliminate the line after a line is fulled
-    	//TODO: to be implemented
+    
+    private boolean checkRow(int row) {
+    	for (int i = 0; i < 9; i++) {
+    		if (grid[row][i] == null) {
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
+    private void eliminateLine(int row) { //eliminate the line after a line is fulled
+    	System.out.println(row);
+    	for (Cell i : grid[row]) {
+    		grid[row][i.getCol()] = null;
+    	}
+    	for (int i = row; i >= 1; i--) {
+    		for (int j = 0; j < 9; j++) {
+    			grid[i][j] = grid[i-1][j];
+    		}
+    	}
+    	for (int j = 0; j < 9; j++) {
+    		grid[0][j] = null;
+    	}
+    	repaint();
     }
 	//game loop
     public boolean isGameOver() { //determine whether gameovers or not
@@ -223,7 +260,15 @@ public class TetrisGame extends JPanel{
     			autoFallDown();
     		}else {
     			lockPiece();
-    			eliminateLine();
+    			for (int i = 17; i >= 0; i--) {
+    				System.out.println(i);
+        			if(checkRow(i)) {
+        				eliminateLine(i);
+        				repaint();
+        				i++;
+        			}
+        		}
+    			repaint();
     			if(isGameOver()) { //if game overs
     				gameState=GAMEOVER;
     			}else {
