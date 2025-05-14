@@ -1,6 +1,6 @@
 package Tetris;
 /**
- * @author mingkun fu
+ * @author mingkun fu, Drake Bauernfeind
  */
 import java.awt.Graphics;
 import java.awt.Graphics2D;
