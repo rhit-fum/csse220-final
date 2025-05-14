@@ -100,7 +100,7 @@ public class TetrisGame extends JPanel{
     	}
     }
     
-    //movements
+    //movements---------------------------------------------------------------------------------------------------
     private void autoFallDown() {
     	Timer animationTimer = new Timer(700, e -> Fall()); //setting up a timer, each 700 ms fall down a unit
     	animationTimer.start();
@@ -112,7 +112,24 @@ public class TetrisGame extends JPanel{
     	animationTimer.start();
     }
     
-    
+    private boolean canRotate() { //determine whether next rotation is valid or not (collision with the bound or other blocks)
+    	Cell[] cells=this.currentPiece.cells;
+    	for(Cell cell:cells) { //collision with left and right bound
+    		int col=cell.getCol();
+    		int row=cell.getRow();
+    		if(row<0||row>grid.length-1||col<0||col>grid[0].length-1) {
+    			return true;
+    		}
+    	}
+    	for (Cell cell : cells) { //collision with other locked pieces
+            int row = cell.getRow();
+            int col = cell.getCol();
+            if (grid[row][col] != null) {
+                return true;
+            }
+        }
+    	return false;
+    }
     private void Fall() { //let tetromino piece fall down a unit
 		// done Auto-generated method stub
     	if(canFall()) { //if can fall down
@@ -159,6 +176,9 @@ public class TetrisGame extends JPanel{
     
     private void rotate() {
     	currentPiece.rotate();
+    	if(canRotate()) {
+    		currentPiece.cancelRotate();
+    	}
     }
     
     private boolean canFall() { //detect whether the current piece will collide with the land or other locked pieces
@@ -175,7 +195,7 @@ public class TetrisGame extends JPanel{
     	return true;
     }
      
-    private boolean canMoveLeft() { //detect whether the current piece will collide with the land or other locked pieces
+    private boolean canMoveLeft() { //detect whether the current piece can go left
     	for (Cell i : currentPiece.cells) {
     		int row = i.getRow();
     		int col = i.getCol();
@@ -189,14 +209,14 @@ public class TetrisGame extends JPanel{
     	return true;
     }
     
-    private boolean canMoveRight() { //detect whether the current piece will collide with the land or other locked pieces
+    private boolean canMoveRight() { //detect whether the current piece can go right
     	for (Cell i : currentPiece.cells) {
     		int row = i.getRow();
     		int col = i.getCol();
     		if (i.getCol() == 8) {
     			return false;
     		}
-    		else if(grid[row][col-1]!=null) {
+    		else if(grid[row][col+1]!=null) {
     			return false;
     		}
     	}
