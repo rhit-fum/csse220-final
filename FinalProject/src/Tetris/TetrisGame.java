@@ -140,11 +140,6 @@ public class TetrisGame extends JPanel{
     	repaint();
     }
     
-    private void fastAutoFall() {
-    	Timer animationTimer = new Timer(200, e -> Fall());
-    	animationTimer.start();
-    }
-    
     private boolean canRotate() { //determine whether next rotation is valid or not (collision with the bound or other blocks)
     	Cell[] cells=this.currentPiece.cells;
     	for(Cell cell:cells) { //collision with left and right bound
@@ -169,7 +164,15 @@ public class TetrisGame extends JPanel{
     		currentPiece.moveDown();
     	}else {
     		lockPiece();
-    		
+    		for (int i = 17; i >= 0; i--) {
+				System.out.println(i);
+    			if(checkRow(i)) {
+    				linesEliminated++;
+    				totalScore+=100;
+    				eliminateLine(i);
+    				i++;
+    			}
+    		}
     		if(isGameOver()) {
     			gameState=GAMEOVER;
     		}else {
@@ -345,29 +348,22 @@ public class TetrisGame extends JPanel{
     	
     	this.addKeyListener(l);
     	this.requestFocus(); //focus on the window
+    	if(this.gameState==PLAYING) {
+    		if(canFall()) {
+    			
+    		}else {
+    			lockPiece();
+    			
+    			if(isGameOver()) { //if game overs
+    				gameState=GAMEOVER;
+    			}else {
+    				currentPiece=nextPiece;
+    				nextPiece=Tetromino.randomPiece(); //generate next piece
+    			}
+    		}
+    	}
     	while(true) {
-    		if(this.gameState==PLAYING) {
-        		if(canFall()) {
-        			
-        		}else {
-        			lockPiece();
-        			for (int i = 17; i >= 0; i--) {
-        				System.out.println(i);
-            			if(checkRow(i)) {
-            				linesEliminated++;
-            				totalScore+=100;
-            				eliminateLine(i);
-            				i++;
-            			}
-            		}
-        			if(isGameOver()) { //if game overs
-        				gameState=GAMEOVER;
-        			}else {
-        				currentPiece=nextPiece;
-        				nextPiece=Tetromino.randomPiece(); //generate next piece
-        			}
-        		}
-        	}
+    		
     		repaint();
     	}
     }
