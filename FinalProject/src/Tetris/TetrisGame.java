@@ -2,6 +2,8 @@ package Tetris;
 /**
  * @author mingkun fu, Drake Bauernfeind
  */
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -25,10 +27,17 @@ public class TetrisGame extends JPanel{
 	//private Tetromino currentPiece=new T(); //test drawing the tetromino piece shaped I, comment this line afterwards
 	private Tetromino currentPiece=Tetromino.randomPiece(); //current piece
 	private Tetromino nextPiece=Tetromino.randomPiece(); //next piece
+	//timer
+	Timer animationTimer;
 	//define game states:
-	public final int PLAYING=0;
-	public final int PAUSE=1;
-	public final int GAMEOVER=2;
+	public final int START=0;
+	public final int PLAYING=1;
+	public final int PAUSE=2;
+	public final int GAMEOVER=3;
+	//Score and game level
+	private int level=1;
+	private int totalScore=0;
+	private int linesEliminated=0;
 	//image of the blocks
 	public static BufferedImage I;
     public static BufferedImage J;
@@ -63,6 +72,8 @@ public class TetrisGame extends JPanel{
     	drawGrid(g2);
     	drawCurrentPiece(g2);
     	drawNextPiece(g2);
+    	drawScore(g2);
+    	drawState(g2);
     	//g2.drawImage(I, 0, 0, this); //test draw a block, comment this line after
     }
     
@@ -99,16 +110,38 @@ public class TetrisGame extends JPanel{
     		g.drawImage(cell.getImage(), x, y, this);
     	}
     }
-    
+    //show game level and score on the window
+    private void drawScore(Graphics2D g) {
+    	g.setFont(new Font(Font.SANS_SERIF,Font.BOLD,30));
+    	g.drawString("Score: "+totalScore, 500, 250);
+    	g.drawString("Game Level:"+1, 500,430);
+    }
+    //show game state
+    private void drawState(Graphics2D g) {
+    	if(gameState==START) {
+    		g.setColor(Color.GREEN);
+            g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 60));
+            g.drawString("PRESS SPACE TO START!", 0, 400);
+    	}else if(gameState==PLAYING) {
+    		g.drawString("P (Pause)", 500, 660);
+    	}else if(gameState==PAUSE) {
+    		g.drawString("C (Continue)", 500, 660);
+    	}else if(gameState==GAMEOVER){
+    		g.drawString("R (Restart)", 500, 660);
+            g.setColor(Color.RED);
+            g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 60));
+            g.drawString("GAME OVER!", 30, 400);
+    	}
+    }
     //movements---------------------------------------------------------------------------------------------------
     private void autoFallDown() {
-    	Timer animationTimer = new Timer(700, e -> Fall()); //setting up a timer, each 700 ms fall down a unit
+    	animationTimer = new Timer(700, e -> Fall()); //setting up a timer, each 700 ms fall down a unit
     	animationTimer.start();
     	repaint();
     }
     
     private void fastAutoFall() {
-    	Timer animationTimer = new Timer(300, e -> Fall());
+    	Timer animationTimer = new Timer(200, e -> Fall());
     	animationTimer.start();
     }
     
@@ -136,16 +169,9 @@ public class TetrisGame extends JPanel{
     		currentPiece.moveDown();
     	}else {
     		lockPiece();
-    		for (int i = 17; i >= 0; i--) {
-				System.out.println(i);
-    			if(checkRow(i)) {
-    				eliminateLine(i);
-    				repaint();
-    				i++;
-    			}
-    		}
+    		
     		if(isGameOver()) {
-    			
+    			gameState=GAMEOVER;
     		}else {
     			currentPiece=nextPiece;
     			nextPiece=Tetromino.randomPiece();
@@ -234,6 +260,7 @@ public class TetrisGame extends JPanel{
     
     private void eliminateLine(int row) { //eliminate the line after a line is fulled
     	System.out.println(row);
+    	int line=0;
     	for (Cell i : grid[row]) {
     		grid[row][i.getCol()] = null;
     	}
@@ -245,63 +272,115 @@ public class TetrisGame extends JPanel{
     	for (int j = 0; j < 9; j++) {
     		grid[0][j] = null;
     	}
-    	repaint();
     }
-	//game loop
+	//game loop-------------------------------------------------------------------------------------------------------
     public boolean isGameOver() { //determine whether gameovers or not
-    	return false; //TODO: to be implemented
+    	Cell[] cells = nextPiece.cells;
+        for (Cell cell : cells) {
+            int row = cell.getRow();
+            int col = cell.getCol();
+            if (grid[row][col] != null) {
+                return true;
+            }
+        }
+        return false;
     }
     public void gameStart() {
-    	gameState=PLAYING;
+    	gameState=START;
     	KeyListener l=new KeyAdapter() { //capture player input
     		@Override
     		public void keyPressed(KeyEvent e) {
     			int key=e.getKeyCode();
     			switch(key) {
+    				case KeyEvent.VK_SPACE:
+    					if(gameState==START||gameState==GAMEOVER) {
+    						autoFallDown();
+    						gameState=PLAYING;
+    					}
     				case KeyEvent.VK_DOWN:
-    					Fall();
+    					if(gameState==PLAYING) {
+    						Fall();
+    					}
     					break;
     				case KeyEvent.VK_LEFT:
-    					moveLeft();
+    					if(gameState==PLAYING) {
+    						moveLeft();
+    					}
     					break;
     				case KeyEvent.VK_RIGHT:
-    					moveRight();
+    					if(gameState==PLAYING) {
+    						moveRight();
+    					}
     					break;
     				case KeyEvent.VK_UP:
-    					rotate();
+    					if(gameState==PLAYING) {
+    						rotate();
+    					}
+    					break;
+    				case KeyEvent.VK_P:
+    					if(gameState==PLAYING) {
+    						gameState=PAUSE;
+    						animationTimer.stop();
+    					}
+    					break;
+    				case KeyEvent.VK_C:
+    					if(gameState==PAUSE) {
+    						gameState=PLAYING;
+    						animationTimer.restart();
+    					}
+    					break;
+    				case KeyEvent.VK_R:
+    					//restart and initialize everything
+    					gameState=PLAYING;
+    					grid=new Cell[18][9];
+    					currentPiece=Tetromino.randomPiece();
+    					nextPiece=Tetromino.randomPiece();
+    					totalScore=0;
+    					linesEliminated=0;
+    					level=1;
     					break;
     			}
     		}
     	};
+    	
     	this.addKeyListener(l);
     	this.requestFocus(); //focus on the window
-    	if(gameState==PLAYING) {
-    		if(canFall()) {
-    			autoFallDown();
-    		}else {
-    			lockPiece();
-    			for (int i = 17; i >= 0; i--) {
-    				System.out.println(i);
-        			if(checkRow(i)) {
-        				eliminateLine(i);
-        				repaint();
-        				i++;
+    	while(true) {
+    		if(this.gameState==PLAYING) {
+        		if(canFall()) {
+        			
+        		}else {
+        			lockPiece();
+        			for (int i = 17; i >= 0; i--) {
+        				System.out.println(i);
+            			if(checkRow(i)) {
+            				linesEliminated++;
+            				totalScore+=100;
+            				eliminateLine(i);
+            				i++;
+            			}
+            		}
+        			if(isGameOver()) { //if game overs
+        				gameState=GAMEOVER;
+        			}else {
+        				currentPiece=nextPiece;
+        				nextPiece=Tetromino.randomPiece(); //generate next piece
         			}
         		}
-    			repaint();
-    			if(isGameOver()) { //if game overs
-    				gameState=GAMEOVER;
-    			}else {
-    				currentPiece=nextPiece;
-    				nextPiece=Tetromino.randomPiece(); //generate next piece
-    			}
-    		}
-    	}
-    	while(true) {
+        	}
     		repaint();
     	}
     }
-    
+    //game UI-----------------------------------------------------------------------------------------------------------------
+    private void drawStartScreenUI(Graphics2D g) {
+    	//TODO
+    }
+    private void drawPauseScreenUI(Graphics2D g) {
+    	//TODO
+    }
+    private void drawGameOverScreenUI(Graphics2D g) {
+    	//TODO
+    }
 	public static void main(String[] args) {
 		//setting up the JFrame and game panel
 		JFrame frame=new JFrame("Tetris Game");
