@@ -27,8 +27,9 @@ public class TetrisGame extends JPanel{
 	//private Tetromino currentPiece=new T(); //test drawing the tetromino piece shaped I, comment this line afterwards
 	private Tetromino currentPiece=Tetromino.randomPiece(); //current piece
 	private Tetromino nextPiece=Tetromino.randomPiece(); //next piece
-	//timer
+	//timer and fall speed
 	Timer animationTimer;
+	int[] speedPool=new int[] {700,500,300,100,50};
 	//define game states:
 	public final int START=0;
 	public final int PLAYING=1;
@@ -114,7 +115,7 @@ public class TetrisGame extends JPanel{
     private void drawScore(Graphics2D g) {
     	g.setFont(new Font(Font.SANS_SERIF,Font.BOLD,30));
     	g.drawString("Score: "+totalScore, 500, 250);
-    	g.drawString("Game Level:"+1, 500,430);
+    	g.drawString("Game Level:"+level, 500,430);
     }
     //show game state
     private void drawState(Graphics2D g) {
@@ -135,7 +136,7 @@ public class TetrisGame extends JPanel{
     }
     //movements---------------------------------------------------------------------------------------------------
     private void autoFallDown() {
-    	animationTimer = new Timer(700, e -> Fall()); //setting up a timer, each 700 ms fall down a unit
+    	animationTimer = new Timer(speedPool[0], e -> Fall()); //setting up a timer, each 700 ms fall down a unit
     	animationTimer.start();
     	repaint();
     }
@@ -169,6 +170,7 @@ public class TetrisGame extends JPanel{
     			if(checkRow(i)) {
     				linesEliminated++;
     				totalScore+=100;
+    				level=totalScore/200;
     				eliminateLine(i);
     				i++;
     			}
@@ -353,7 +355,6 @@ public class TetrisGame extends JPanel{
     			
     		}else {
     			lockPiece();
-    			
     			if(isGameOver()) { //if game overs
     				gameState=GAMEOVER;
     			}else {
@@ -363,7 +364,15 @@ public class TetrisGame extends JPanel{
     		}
     	}
     	while(true) {
-    		
+    		if(this.gameState==PLAYING) {
+    			level=totalScore/200+1;
+        		if(level<=5) { //change the fall speed based on the game level
+        			animationTimer.setDelay(speedPool[level-1]);
+        		}else {
+        			animationTimer.setDelay(speedPool[4]);
+        		}
+        		System.out.println("level: "+level);
+    		}
     		repaint();
     	}
     }
