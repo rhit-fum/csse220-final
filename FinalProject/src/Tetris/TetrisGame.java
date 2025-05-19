@@ -55,6 +55,7 @@ public class TetrisGame extends JPanel{
     public static BufferedImage background;
     //sound effects
     public static AudioInputStream placeBlock;
+    public static AudioInputStream eliminateLine;
     //load images
     static {
         try {
@@ -71,6 +72,17 @@ public class TetrisGame extends JPanel{
         }
     }
     //sound
+    private void playEliminateLineSound() {
+    	Clip clip;
+		try {
+			eliminateLine=AudioSystem.getAudioInputStream(new File("src/resource/tetry.wav"));
+			clip = AudioSystem.getClip();
+			clip.open(eliminateLine);
+			clip.start();
+		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		}
+    }
     private void playPlaceBlockSound() {
     	Clip clip;
 		try {
@@ -190,7 +202,8 @@ public class TetrisGame extends JPanel{
     				linesEliminated++;
     				totalScore+=100;
     				level=totalScore/200;
-    				eliminateLine(i);	
+    				eliminateLine(i);
+    				playEliminateLineSound();
     				i++;
     			}
     		}
