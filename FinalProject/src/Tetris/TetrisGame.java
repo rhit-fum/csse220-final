@@ -16,6 +16,11 @@ import java.io.IOException;
 import java.awt.event.KeyListener;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -48,6 +53,8 @@ public class TetrisGame extends JPanel{
     public static BufferedImage T;
     public static BufferedImage Z;
     public static BufferedImage background;
+    //sound effects
+    public static AudioInputStream placeBlock;
     //load images
     static {
         try {
@@ -63,7 +70,18 @@ public class TetrisGame extends JPanel{
             System.out.print("image not found");
         }
     }
-    
+    //sound
+    private void playPlaceBlockSound() {
+    	Clip clip;
+		try {
+			placeBlock=AudioSystem.getAudioInputStream(new File("src/resource/Minecraft.wav"));
+			clip = AudioSystem.getClip();
+			clip.open(placeBlock);
+			clip.start();
+		} catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		}
+    }
     @Override
     protected void paintComponent(Graphics g) {
     	super.paintComponent(g);
@@ -165,13 +183,14 @@ public class TetrisGame extends JPanel{
     		currentPiece.moveDown();
     	}else {
     		lockPiece();
+    		playPlaceBlockSound();
     		for (int i = 17; i >= 0; i--) {
 				System.out.println(i);
     			if(checkRow(i)) {
     				linesEliminated++;
     				totalScore+=100;
     				level=totalScore/200;
-    				eliminateLine(i);
+    				eliminateLine(i);	
     				i++;
     			}
     		}
@@ -371,7 +390,7 @@ public class TetrisGame extends JPanel{
         		}else {
         			animationTimer.setDelay(speedPool[4]);
         		}
-        		System.out.println("level: "+level);
+        		//System.out.println("level: "+level);
     		}
     		repaint();
     	}
