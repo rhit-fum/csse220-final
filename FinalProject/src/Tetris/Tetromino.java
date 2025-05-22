@@ -24,6 +24,12 @@ public class Tetromino {
 			cell.down();
 		}
 	}
+	
+	//Method for placing a piece at the initial tile. Important for having pieces spawn at the top after being stored
+	public void restartPiece() {
+		
+	}
+	
 	//generate tetromino pieces randomly
 	public static Tetromino randomPiece() {
         int num = (int) (Math.random() * 7);
@@ -67,6 +73,7 @@ public class Tetromino {
 			}
 		}
 	}
+	
 	public void cancelRotate() {
 		for (Cell cell:cells) {
 			if (!cell.equals(cells[0])) {

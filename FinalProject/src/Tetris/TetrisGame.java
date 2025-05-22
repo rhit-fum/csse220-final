@@ -27,11 +27,12 @@ import javax.swing.Timer;
 
 public class TetrisGame extends JPanel{
 	private int gameState; //gamestate: pause,continue, replay
-	private Cell[][] grid=new Cell[18][9]; //the grids in the window. the window have 18*9 grids
+	private Cell[][] grid=new Cell[19][9]; //the grids in the window. the window have 18*10 grids
 	private final int GRID_SIZE=48; //grid size is 48*48
 	//private Tetromino currentPiece=new T(); //test drawing the tetromino piece shaped I, comment this line afterwards
 	private Tetromino currentPiece=Tetromino.randomPiece(); //current piece
 	private Tetromino nextPiece=Tetromino.randomPiece(); //next piece
+	private Tetromino storedPiece = null;
 	//timer and fall speed
 	Timer animationTimer;
 	int[] speedPool=new int[] {700,500,300,100,50};
@@ -103,6 +104,7 @@ public class TetrisGame extends JPanel{
     	drawGrid(g2);
     	drawCurrentPiece(g2);
     	drawNextPiece(g2);
+    	drawStoredPiece(g2);
     	drawScore(g2);
     	drawState(g2);
     	//g2.drawImage(I, 0, 0, this); //test draw a block, comment this line after
@@ -110,7 +112,7 @@ public class TetrisGame extends JPanel{
     
     //drawing the grids on the window
     private void drawGrid(Graphics2D g) {
-    	for(int i=0;i<grid.length;i++) {
+    	for(int i=0;i<grid.length-1;i++) {
     		for(int j=0;j<grid[i].length;j++) {
     			int x=j*GRID_SIZE; //getting x and y position of each cell
     			int y=i*GRID_SIZE;
@@ -126,7 +128,7 @@ public class TetrisGame extends JPanel{
     	Cell[] cells=currentPiece.cells;
     	for(Cell cell:cells) {
     		int x=cell.getCol()*GRID_SIZE;
-    		int y=cell.getRow()*GRID_SIZE;
+    		int y=(cell.getRow()-1)*GRID_SIZE;
     		g.drawImage(cell.getImage(), x, y, this);
     	}
     	
@@ -137,10 +139,23 @@ public class TetrisGame extends JPanel{
     	Cell[] cells=nextPiece.cells;
     	for(Cell cell:cells) {
     		int x=cell.getCol()*GRID_SIZE+370;
-    		int y= cell.getRow()*GRID_SIZE+25;
+    		int y= (cell.getRow()-1)*GRID_SIZE+25;
     		g.drawImage(cell.getImage(), x, y, this);
     	}
     }
+    
+    //draw the stored tetromino piece
+    private void drawStoredPiece(Graphics2D g) {
+    	if (storedPiece != null) {
+	    	Cell[] cells = storedPiece.cells;
+	    	for (Cell cell:cells) {
+	    		int x = cell.getCol()*GRID_SIZE + 370;
+	    		int y = (cell.getRow()+15)*GRID_SIZE - GRID_SIZE/2;
+	    		g.drawImage(cell.getImage(),x, y, this);
+	    	}
+    	}
+    }
+    
     //show game level and score on the window
     private void drawScore(Graphics2D g) {
     	g.setFont(new Font(Font.SANS_SERIF,Font.BOLD,30));
@@ -197,7 +212,6 @@ public class TetrisGame extends JPanel{
     		lockPiece();
     		playPlaceBlockSound();
     		for (int i = 17; i >= 0; i--) {
-				System.out.println(i);
     			if(checkRow(i)) {
     				linesEliminated++;
     				totalScore+=100;
@@ -216,6 +230,23 @@ public class TetrisGame extends JPanel{
     	}
     	
 	}
+    
+    private void storePiece() {
+    	if (storedPiece == null) {
+    		storedPiece = currentPiece;
+    		storedPiece.restartPiece();
+    		currentPiece = nextPiece;
+    		nextPiece = Tetromino.randomPiece();
+    	}
+    	else {
+    		Tetromino temp = new Tetromino();
+    		temp = storedPiece;
+    		storedPiece = currentPiece;
+    		storedPiece.restartPiece();
+    		currentPiece = temp;
+    	}
+    }
+    
     private void lockPiece() { //lock the landed pieces to the gameboard
     	Cell[] cells=currentPiece.cells;
     	for(Cell cell:cells) {
@@ -238,6 +269,13 @@ public class TetrisGame extends JPanel{
     }
     
     private void rotate() {
+    	currentPiece.cancelRotate();
+    	if(canRotate()) {
+    		currentPiece.rotate();
+    	}
+    }
+    
+    private void rotateBackwards() {
     	currentPiece.rotate();
     	if(canRotate()) {
     		currentPiece.cancelRotate();
@@ -256,6 +294,13 @@ public class TetrisGame extends JPanel{
     		}
     	}
     	return true;
+    }
+    
+    private void instantDrop() {
+    	while(canFall()) { //if can fall down
+    		currentPiece.moveDown();
+    	}
+    	Fall();
     }
      
     private boolean canMoveLeft() { //detect whether the current piece can go left
@@ -296,7 +341,6 @@ public class TetrisGame extends JPanel{
     }
     
     private void eliminateLine(int row) { //eliminate the line after a line is fulled
-    	System.out.println(row);
     	int line=0;
     	for (Cell i : grid[row]) {
     		grid[row][i.getCol()] = null;
@@ -330,9 +374,14 @@ public class TetrisGame extends JPanel{
     			int key=e.getKeyCode();
     			switch(key) {
     				case KeyEvent.VK_SPACE:
-    					if(gameState==START||gameState==GAMEOVER) {
+    					if(gameState==START) {
     						autoFallDown();
     						gameState=PLAYING;
+    						break;
+    					}
+    					if(gameState==PLAYING) {
+    						instantDrop();
+    						break;
     					}
     				case KeyEvent.VK_DOWN:
     					if(gameState==PLAYING) {
@@ -364,14 +413,30 @@ public class TetrisGame extends JPanel{
     					if(gameState==PAUSE) {
     						gameState=PLAYING;
     						animationTimer.restart();
+    						break;
+    					}
+    					if(gameState==PLAYING) {
+    						storePiece();
+    						break;
+    					}
+    				case KeyEvent.VK_X:
+    					if(gameState==PLAYING) {
+    						rotate();
+    					}
+						break;
+    				case KeyEvent.VK_Z:
+    					if(gameState==PLAYING) {
+    						rotateBackwards();
     					}
     					break;
     				case KeyEvent.VK_R:
     					//restart and initialize everything
     					gameState=PLAYING;
-    					grid=new Cell[18][9];
+    					storedPiece = null;
+    					grid=new Cell[19][9];
     					currentPiece=Tetromino.randomPiece();
     					nextPiece=Tetromino.randomPiece();
+    					animationTimer.restart();
     					totalScore=0;
     					linesEliminated=0;
     					level=1;
@@ -397,7 +462,7 @@ public class TetrisGame extends JPanel{
     	}
     	while(true) {
     		if(this.gameState==PLAYING) {
-    			level=totalScore/200+1;
+    			level=totalScore/2000+1;
         		if(level<=5) { //change the fall speed based on the game level
         			animationTimer.setDelay(speedPool[level-1]);
         		}else {
