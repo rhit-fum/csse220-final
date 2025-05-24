@@ -1,6 +1,10 @@
 package Tetris;
 /**
  * @author mingkun fu, Drake Bauernfeind
+ * 
+ * only used csse220 materials
+ * The tetris textures are found in: https://www.vectorstock.com/royalty-free-vector/letter-z-tetris-game-vector-50038275
+ * The voice effects are found in: https://www.zedge.net/notification-sounds/0ac8c638-cdca-41fb-a3ad-df441a821725
  */
 import java.awt.Color;
 import java.awt.Font;
@@ -24,7 +28,11 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-
+/**
+ * Class: TetrisGame
+ * @author mingkun fu, Drake Bauernfeind
+ * purpose: the game class, used to handle the player controls and events, and paint textures on the window
+ */
 public class TetrisGame extends JPanel{
 	private int gameState; //gamestate: pause,continue, replay
 	private Cell[][] grid=new Cell[19][9]; //the grids in the window. the window have 18*10 grids
@@ -110,7 +118,10 @@ public class TetrisGame extends JPanel{
     	//g2.drawImage(I, 0, 0, this); //test draw a block, comment this line after
     }
     
-    //drawing the grids on the window
+    /**
+     * ensures: drawing the grids on the window
+     * @param g is the Graphics2D object
+     */
     private void drawGrid(Graphics2D g) {
     	for(int i=0;i<grid.length-1;i++) {
     		for(int j=0;j<grid[i].length;j++) {
@@ -123,7 +134,10 @@ public class TetrisGame extends JPanel{
     	}
     }
     
-    //draw the current tetromino piece
+    /**
+     * ensures: draw the current tetromino piece
+     * @param g
+     */
     private void drawCurrentPiece(Graphics2D g) {
     	Cell[] cells=currentPiece.cells;
     	for(Cell cell:cells) {
@@ -134,7 +148,10 @@ public class TetrisGame extends JPanel{
     	
     }
     
-    //draw the next tetromino piece
+    /**
+     * ensures:draw the next tetromino piece
+     * @param g
+     */
     private void drawNextPiece(Graphics2D g) {
     	Cell[] cells=nextPiece.cells;
     	for(Cell cell:cells) {
@@ -144,7 +161,10 @@ public class TetrisGame extends JPanel{
     	}
     }
     
-    //draw the stored tetromino piece
+    /**
+     * ensures: draw the stored tetromino piece
+     * @param g
+     */
     private void drawStoredPiece(Graphics2D g) {
     	if (storedPiece != null) {
 	    	Cell[] cells = storedPiece.cells;
@@ -156,20 +176,26 @@ public class TetrisGame extends JPanel{
     	}
     }
     
-    //show game level and score on the window
+    /**
+     * ensures: show game level and score on the window
+     * @param g
+     */
     private void drawScore(Graphics2D g) {
     	g.setFont(new Font(Font.SANS_SERIF,Font.BOLD,30));
     	g.drawString("Score: "+totalScore, 500, 250);
     	g.drawString("Game Level:"+level, 500,430);
     }
-    //show game state
+    /**
+     * ensures: show game state
+     * @param g
+     */
     private void drawState(Graphics2D g) {
     	if(gameState==START) {
     		g.setColor(Color.RED);
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 60));
             g.drawString("PRESS SPACE TO START!", 0, 400);
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
-            g.drawString("S (Rotate)",0,460);
+            g.drawString("up (Rotate)",0,460);
             g.drawString("Z (Rotate Backwards)",0,490);
             g.drawString("P (Pause)",0,520);
             g.drawString("R (Restart)",0,550);
@@ -177,7 +203,7 @@ public class TetrisGame extends JPanel{
     		g.drawString("P (Pause)", 500, 660);
     	}else if(gameState==PAUSE) {
     		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
-            g.drawString("S (Rotate)",0,460);
+            g.drawString("up (Rotate)",0,460);
             g.drawString("Z (Rotate Backwards)",0,490);
             g.drawString("C (Continue)",0,520);
             g.drawString("R (Restart)",0,550);
@@ -190,12 +216,19 @@ public class TetrisGame extends JPanel{
     	}
     }
     //movements---------------------------------------------------------------------------------------------------
+    /**
+     * ensures: let the current tetromino piece to fall down one unit per setted time
+     */
     private void autoFallDown() {
     	animationTimer = new Timer(speedPool[0], e -> Fall()); //setting up a timer, each 700 ms fall down a unit
     	animationTimer.start();
     	repaint();
     }
     
+    /**
+     * ensures: check if next rotation is available or have collision with other blocks
+     * @return true or false
+     */
     private boolean canRotate() { //determine whether next rotation is valid or not (collision with the bound or other blocks)
     	Cell[] cells=this.currentPiece.cells;
     	for(Cell cell:cells) { //collision with left and right bound
@@ -214,6 +247,10 @@ public class TetrisGame extends JPanel{
         }
     	return false;
     }
+    /**
+     * ensures: let the tetromino piece to fall. if there is collision, than lock the piece on its current location and
+     * generate a new piece
+     */
     private void Fall() { //let tetromino piece fall down a unit
 		// done Auto-generated method stub
     	if(canFall()) { //if can fall down
@@ -257,6 +294,9 @@ public class TetrisGame extends JPanel{
     	}
     }
     
+    /**
+     * ensures: lock the current piece to its location
+     */
     private void lockPiece() { //lock the landed pieces to the gameboard
     	Cell[] cells=currentPiece.cells;
     	for(Cell cell:cells) {
@@ -265,33 +305,44 @@ public class TetrisGame extends JPanel{
     		grid[row][col]=cell;
     	}
     }
-    
+    /**
+     * ensures: move the current tetromino piece leftwards a unit
+     */
     private void moveLeft() {
     	if (canMoveLeft()) {
     		currentPiece.moveLeft();
     	}
     }
-    
+    /**
+     * ensures: move the current tetromino piece rightwards a unit
+     */
     private void moveRight() {
     	if (canMoveRight()) {
     		currentPiece.moveRight();
     	}
     }
-    
+    /**
+     * ensures: rotate the current piece clockwise
+     */
     private void rotate() {
     	currentPiece.cancelRotate();
     	if(canRotate()) {
     		currentPiece.rotate();
     	}
     }
-    
+    /**
+     * ensures: rotate the current piece anti-clockwise
+     */
     private void rotateBackwards() {
     	currentPiece.rotate();
     	if(canRotate()) {
     		currentPiece.cancelRotate();
     	}
     }
-    
+    /**
+     * ensures: check whether the current piece will have collision with the ground or other blocks in the next movement
+     * @return true or false
+     */
     private boolean canFall() { //detect whether the current piece will collide with the land or other locked pieces
     	for (Cell i : currentPiece.cells) {
     		int row = i.getRow();
@@ -305,14 +356,19 @@ public class TetrisGame extends JPanel{
     	}
     	return true;
     }
-    
+    /**
+     * ensures: place the current piece on the ground
+     */
     private void instantDrop() {
     	while(canFall()) { //if can fall down
     		currentPiece.moveDown();
     	}
     	Fall();
     }
-     
+    /**
+     * ensures: check whether the current piece can move left or not
+     * @return true or false
+     */
     private boolean canMoveLeft() { //detect whether the current piece can go left
     	for (Cell i : currentPiece.cells) {
     		int row = i.getRow();
@@ -326,7 +382,10 @@ public class TetrisGame extends JPanel{
     	}
     	return true;
     }
-    
+    /**
+     * ensures: check whether the current piece can move right or not
+     * @return true or false
+     */
     private boolean canMoveRight() { //detect whether the current piece can go right
     	for (Cell i : currentPiece.cells) {
     		int row = i.getRow();
@@ -340,7 +399,11 @@ public class TetrisGame extends JPanel{
     	}
     	return true;
     }
-    
+    /**
+     * ensures: check whether a particular row is full or not
+     * @param row
+     * @return true or false
+     */
     private boolean checkRow(int row) {
     	for (int i = 0; i < 9; i++) {
     		if (grid[row][i] == null) {
@@ -349,7 +412,10 @@ public class TetrisGame extends JPanel{
     	}
     	return true;
     }
-    
+    /**
+     * ensures: delete the full line
+     * @param row
+     */
     private void eliminateLine(int row) { //eliminate the line after a line is fulled
     	int line=0;
     	for (Cell i : grid[row]) {
@@ -365,6 +431,11 @@ public class TetrisGame extends JPanel{
     	}
     }
 	//game loop-------------------------------------------------------------------------------------------------------
+    
+    /**
+     * ensure: determine whether the game should end or not
+     * @return true or false
+     */
     public boolean isGameOver() { //determine whether gameovers or not
     	Cell[] cells = nextPiece.cells;
         for (Cell cell : cells) {
@@ -376,6 +447,9 @@ public class TetrisGame extends JPanel{
         }
         return false;
     }
+    /**
+     * ensures: the game loop and user controls
+     */
     public void gameStart() {
     	gameState=START;
     	KeyListener l=new KeyAdapter() { //capture player input
@@ -472,7 +546,7 @@ public class TetrisGame extends JPanel{
     	}
     	while(true) {
     		if(this.gameState==PLAYING) {
-    			level=totalScore/2000+1;
+    			level=totalScore/200+1;
         		if(level<=5) { //change the fall speed based on the game level
         			animationTimer.setDelay(speedPool[level-1]);
         		}else {
@@ -483,16 +557,10 @@ public class TetrisGame extends JPanel{
     		repaint();
     	}
     }
-    //game UI-----------------------------------------------------------------------------------------------------------------
-    private void drawStartScreenUI(Graphics2D g) {
-    	//TODO
-    }
-    private void drawPauseScreenUI(Graphics2D g) {
-    	//TODO
-    }
-    private void drawGameOverScreenUI(Graphics2D g) {
-    	//TODO
-    }
+    /**
+     * ensures: the main function
+     * @param args
+     */
 	public static void main(String[] args) {
 		//setting up the JFrame and game panel
 		JFrame frame=new JFrame("Tetris Game");
