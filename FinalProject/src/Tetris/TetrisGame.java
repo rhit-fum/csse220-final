@@ -165,14 +165,24 @@ public class TetrisGame extends JPanel{
     //show game state
     private void drawState(Graphics2D g) {
     	if(gameState==START) {
-    		g.setColor(Color.GREEN);
+    		g.setColor(Color.RED);
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 60));
             g.drawString("PRESS SPACE TO START!", 0, 400);
+            g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
+            g.drawString("S (Rotate)",0,460);
+            g.drawString("Z (Rotate Backwards)",0,490);
+            g.drawString("P (Pause)",0,520);
+            g.drawString("R (Restart)",0,550);
     	}else if(gameState==PLAYING) {
     		g.drawString("P (Pause)", 500, 660);
     	}else if(gameState==PAUSE) {
-    		g.drawString("C (Continue)", 500, 660);
+    		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
+            g.drawString("S (Rotate)",0,460);
+            g.drawString("Z (Rotate Backwards)",0,490);
+            g.drawString("C (Continue)",0,520);
+            g.drawString("R (Restart)",0,550);
     	}else if(gameState==GAMEOVER){
+    		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 60));
     		g.drawString("R (Restart)", 500, 660);
             g.setColor(Color.RED);
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 60));
