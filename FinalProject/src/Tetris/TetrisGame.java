@@ -33,6 +33,7 @@ import javax.swing.Timer;
  * @author mingkun fu, Drake Bauernfeind
  * purpose: the game class, used to handle the player controls and events, and paint textures on the window
  */
+
 public class TetrisGame extends JPanel{
 	private int gameState; //gamestate: pause,continue, replay
 	private Cell[][] grid=new Cell[19][9]; //the grids in the window. the window have 18*10 grids
