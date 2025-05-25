@@ -1,11 +1,21 @@
 package Tetris;
 
 import javax.imageio.ImageIO;
-
+/**
+ * @author mingkun fu, Drake Bauernfeind
+ * purpose: The subclass of tetromino, each subclass represents a specific shape of tetromino piece
+ */
 public class O extends Tetromino{
 	@Override
-	public void rotate() {}
+	/**
+	 * ensures: does nothing since this type of tetromino piece remains the same after rotation
+	 */
+	public void rotate() {};
 	
+	/**
+	 * ensures: set up the position of cells for this tetromino piece
+	 */
+	@Override
 	public void restartPiece() {
 		cells[0] = new Cell(1,4, TetrisGame.O);
         cells[1] = new Cell(1,3, TetrisGame.O);
